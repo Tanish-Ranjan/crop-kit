@@ -62,7 +62,7 @@ tasks.register("copyAar") {
 }
 
 tasks.assemble {
-    finalizedBy(":jetpack_compose_components:copyAar")
+    finalizedBy(":cropkit:copyAar")
 }
 
 afterEvaluate {
@@ -72,7 +72,7 @@ afterEvaluate {
                 from(components["release"])
 
                 groupId = "com.github.tanish-ranjan"
-                artifactId = "jetpack_compose_components"
+                artifactId = "crop_kit"
                 version = "1.0.0"
             }
         }
