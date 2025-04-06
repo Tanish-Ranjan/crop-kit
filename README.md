@@ -10,6 +10,13 @@ yet customizable crop composable to style embed it in your app seamlessly.
 - Image can be rotated clockwise and anti-clockwise by 90 degrees.
 - Gridlines can be enabled or disabled.
 
+## Preview
+
+<video height="500" controls>
+  <source src="/assets/demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 ## 🚀 Getting Started
 
 1. **Add the JitPack repository to your root build.gradle file:**
@@ -49,7 +56,7 @@ yet customizable crop composable to style embed it in your app seamlessly.
 
     ```gradle
     dependencies {
-        implementation("com.github.Tanish-Ranjan:crop_kit:version")
+        implementation("com.github.Tanish-Ranjan:crop-kit:version")
     }
     ```
 
@@ -60,7 +67,7 @@ yet customizable crop composable to style embed it in your app seamlessly.
 
     ```gradle
     dependencies {
-        implementation 'com.github.Tanish-Ranjan:crop_kit:version'
+        implementation 'com.github.Tanish-Ranjan:crop-kit:version'
     }
     ```
 
