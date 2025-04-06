@@ -12,7 +12,7 @@ yet customizable crop composable to style embed it in your app seamlessly.
 
 ## Preview
 
-https://github.com/Tanish-Ranjan/crop-kit/blob/main/assets/demo.mp4
+https://github.com/user-attachments/assets/df19cff9-95fe-415d-bf17-0a8bb4da7a32
 
 ## 🚀 Getting Started
 
