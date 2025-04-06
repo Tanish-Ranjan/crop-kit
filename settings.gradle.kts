@@ -16,9 +16,13 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
 rootProject.name = "CropKit"
-include(":app")
+val jitpackEnv: String? = System.getenv("JITPACK")
+if (jitpackEnv.isNullOrEmpty() || !jitpackEnv.toBoolean()) {
+    include(":app")
+}
 include(":cropkit")

@@ -3,14 +3,14 @@
 Crop Kit is a Jetpack Compose library that allows you to easily crop images. It provides a simple
 yet customizable crop composable to style embed it in your app seamlessly.
 
-## Features
+## ✨ Features
 
 - Provides three crop shapes: Rectangle, Square, and Circle.
 - Allows flipping the image vertically or horizontally.
 - Image can be rotated clockwise and anti-clockwise by 90 degrees.
 - Gridlines can be enabled or disabled.
 
-## Getting Started
+## 🚀 Getting Started
 
 1. **Add the JitPack repository to your root build.gradle file:**
     <details open>
@@ -95,11 +95,11 @@ yet customizable crop composable to style embed it in your app seamlessly.
 
 See [demo app](/app) for full implementation.
 
-## Contributing
+## 🤝 Contributing
 
 We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) for more information
 on how to get involved.
 
-## License
+## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).

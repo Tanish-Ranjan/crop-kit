@@ -2,11 +2,13 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    id("maven-publish")
 }
 
 android {
     namespace = "com.tanishranjan.cropkit"
     compileSdk = 35
+    version = "1.0.0"
 
     defaultConfig {
         minSdk = 21
@@ -47,4 +49,32 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+tasks.register("copyAar") {
+    doLast {
+        copy {
+            from(file("build/outputs/aar/${project.name}-release.aar"))
+            into(projectDir)
+        }
+    }
+    outputs.file(projectDir.resolve("${project.name}-release.aar"))
+}
+
+tasks.assemble {
+    finalizedBy(":jetpack_compose_components:copyAar")
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            register<MavenPublication>("release") {
+                from(components["release"])
+
+                groupId = "com.github.tanish-ranjan"
+                artifactId = "jetpack_compose_components"
+                version = "1.0.0"
+            }
+        }
+    }
 }
