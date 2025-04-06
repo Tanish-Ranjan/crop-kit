@@ -13,7 +13,7 @@ yet customizable crop composable to style embed it in your app seamlessly.
 ## Preview
 
 <video height="500" controls>
-  <source src="/assets/demo.mp4" type="video/mp4">
+  <source src="https://github.com/Tanish-Ranjan/crop-kit/blob/main/assets/demo.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 
