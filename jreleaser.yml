@@ -1,0 +1,31 @@
+project:
+  snapshot:
+    pattern: -SNAPSHOT
+
+release:
+  github:
+    owner: Tanish-Ranjan
+    name: crop-kit
+    token: '{{prop.git.token}}'
+    tagName: 'v{{projectVersion}}'
+    releaseName: 'v{{projectVersion}}'
+    prerelease:
+      enabled: true
+    draft: true
+
+deploy:
+  maven:
+    central:
+      active: ALWAYS
+      url: https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/
+      snapshotUrl: https://s01.oss.sonatype.org/content/repositories/snapshots/
+
+      stagingRepositories:
+        - https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/
+      closeRepository: true
+      releaseRepository: true
+
+      username: '{{prop.central.username}}'
+      password: '{{prop.central.password}}'
+
+      sign: false
