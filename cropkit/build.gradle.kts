@@ -72,7 +72,7 @@ afterEvaluate {
                 from(components["release"])
 
                 groupId = "com.github.tanish-ranjan"
-                artifactId = "crop_kit"
+                artifactId = "crop-kit"
                 version = "1.0.0"
             }
         }
