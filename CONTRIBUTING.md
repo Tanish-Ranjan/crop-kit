@@ -11,7 +11,7 @@ We welcome contributions of all kinds, including:
 - **Code Contributions:** We love pull requests!  If you'd like to fix a bug, add a new component, or improve existing code, follow these steps:
 
     1. **Fork the Repository:** Click the "Fork" button at the top right of the repository page.
-    2. **Create a Branch:** Create a new branch for your changes.  Use a descriptive name like `fix/drag-gesture` or `add/vertical-gridline`.
+    2. **Create a Branch:** Create a new branch for your changes.  Use a descriptive name like `fix/drag-gesture` or `feat/vertical-gridline`.
     3. **Make Your Changes:** Implement your changes, following the project's coding style and conventions.
     4. **Write Tests:** If applicable, add or update tests to ensure your changes work as expected.
     5. **Commit Your Changes:** Commit your changes with clear and concise commit messages.

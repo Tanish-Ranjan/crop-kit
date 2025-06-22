@@ -5,10 +5,18 @@ yet customizable crop composable to style embed it in your app seamlessly.
 
 ## ✨ Features
 
-- Provides three crop shapes: Rectangle, Square, and Circle.
-- Allows flipping the image vertically or horizontally.
-- Image can be rotated clockwise and anti-clockwise by 90 degrees.
-- Gridlines can be enabled or disabled.
+- Choose from a variety of crop shapes including:
+    - Free Form: Crop to any desired rectangular size.
+    - Original: Maintain image's original aspect ratio during cropping.
+    - Aspect Ratio: Specify any custom aspect ratio (1:1, 16:9, 4:3, etc.) for precise and
+      consistent cropping.
+- Image Transformations:
+    - Flip images vertically or horizontally.
+    - Rotate images clockwise or anti-clockwise by 90 degrees.
+- Customize GridLines:
+    - Gridlines can be set to be always visible, be visible on touch or never be visible.
+    - Several types of gridlines are available such as crosshair, 3x3 grid, circle, 3x3 grid with
+      circle.
 
 ## Preview
 
