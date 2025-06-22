@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.tanishranjan.cropkit"
     compileSdk = 35
-    version = "1.0.0"
+    version = "1.1.0"
 
     defaultConfig {
         minSdk = 21
@@ -73,7 +73,6 @@ afterEvaluate {
 
                 groupId = "com.github.tanish-ranjan"
                 artifactId = "crop-kit"
-                version = "1.0.0"
             }
         }
     }

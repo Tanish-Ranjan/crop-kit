@@ -21,7 +21,7 @@ class CropController(
         bitmap = bitmap,
         cropShape = cropOptions.cropShape,
         contentScale = cropOptions.contentScale,
-        gridlines = cropOptions.gridlines,
+        gridLinesVisibility = cropOptions.gridLinesVisibility,
         handleRadius = cropOptions.handleRadius,
         touchPadding = cropOptions.touchPadding
     )
