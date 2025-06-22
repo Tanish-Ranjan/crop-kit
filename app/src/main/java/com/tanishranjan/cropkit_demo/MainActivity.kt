@@ -48,7 +48,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.tanishranjan.cropkit.CropDefaults
+import com.tanishranjan.cropkit.CropRatio
 import com.tanishranjan.cropkit.CropShape
+import com.tanishranjan.cropkit.GridLinesType
 import com.tanishranjan.cropkit.ImageCropper
 import com.tanishranjan.cropkit.rememberCropController
 import com.tanishranjan.cropkit_demo.ui.theme.CropKitTheme
@@ -65,12 +67,14 @@ class MainActivity : ComponentActivity() {
             CropKitTheme {
 
                 var image: Bitmap? by remember { mutableStateOf(null) }
-                var cropShape by remember { mutableStateOf(CropShape.RECTANGLE) }
+                var cropShape: CropShape by remember { mutableStateOf(CropShape.Original) }
+                var gridLinesType by remember { mutableStateOf(GridLinesType.GRID) }
                 val cropController = image?.let {
                     rememberCropController(
                         bitmap = it,
                         cropOptions = CropDefaults.cropOptions(
-                            cropShape = cropShape
+                            cropShape = cropShape,
+                            gridLinesType = gridLinesType
                         )
                     )
                 }
@@ -139,39 +143,54 @@ class MainActivity : ComponentActivity() {
                                     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
 
                                         SegmentedButton(
-                                            selected = cropShape == CropShape.RECTANGLE,
+                                            selected = cropShape == CropShape.FreeForm,
                                             onClick = {
-                                                cropShape = CropShape.RECTANGLE
+                                                cropShape = CropShape.FreeForm
                                             },
                                             shape = SegmentedButtonDefaults.itemShape(
                                                 index = 0,
-                                                count = 3
+                                                count = 4
                                             )
                                         ) {
                                             Text("Free-Form")
                                         }
 
                                         SegmentedButton(
-                                            selected = cropShape == CropShape.SQUARE,
+                                            selected = cropShape == CropShape.Original,
                                             onClick = {
-                                                cropShape = CropShape.SQUARE
+                                                cropShape = CropShape.Original
                                             },
                                             shape = SegmentedButtonDefaults.itemShape(
                                                 index = 1,
-                                                count = 3
+                                                count = 4
+                                            )
+                                        ) {
+                                            Text("Original")
+                                        }
+
+                                        SegmentedButton(
+                                            selected = cropShape is CropShape.AspectRatio && gridLinesType == GridLinesType.CROSSHAIR,
+                                            onClick = {
+                                                cropShape = CropShape.AspectRatio(CropRatio.SQUARE)
+                                                gridLinesType = GridLinesType.CROSSHAIR
+                                            },
+                                            shape = SegmentedButtonDefaults.itemShape(
+                                                index = 2,
+                                                count = 4
                                             )
                                         ) {
                                             Text("Square")
                                         }
 
                                         SegmentedButton(
-                                            selected = cropShape == CropShape.CIRCLE,
+                                            selected = cropShape is CropShape.AspectRatio && gridLinesType == GridLinesType.GRID_AND_CIRCLE,
                                             onClick = {
-                                                cropShape = CropShape.CIRCLE
+                                                cropShape = CropShape.AspectRatio(CropRatio.SQUARE)
+                                                gridLinesType = GridLinesType.GRID_AND_CIRCLE
                                             },
                                             shape = SegmentedButtonDefaults.itemShape(
-                                                index = 2,
-                                                count = 3
+                                                index = 3,
+                                                count = 4
                                             )
                                         ) {
                                             Text("Circle")

@@ -3,7 +3,7 @@ package com.tanishranjan.cropkit
 /**
  * Enum class to represent the gridlines visibility.
  */
-enum class Gridlines {
+enum class GridLinesVisibility {
     ALWAYS,
     ON_TOUCH,
     NEVER

@@ -17,6 +17,7 @@ import com.tanishranjan.cropkit.HandlesRect
  * @param canvasSize The size of the canvas.
  * @param isDragging Whether the user is dragging the crop rectangle or any of its handles.
  * @param gridlinesActive Whether the gridlines are active.
+ * @param aspectRatio The aspect ratio of the crop rectangle.
  */
 internal data class CropState(
     val bitmap: Bitmap,
@@ -26,5 +27,6 @@ internal data class CropState(
     val handles: HandlesRect = HandlesRect(),
     val canvasSize: Size = Size.Zero,
     val isDragging: Boolean = false,
-    val gridlinesActive: Boolean = false
+    val gridlinesActive: Boolean = false,
+    val aspectRatio: Float = 0f
 )

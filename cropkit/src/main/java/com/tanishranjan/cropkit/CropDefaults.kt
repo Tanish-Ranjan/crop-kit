@@ -11,15 +11,17 @@ object CropDefaults {
      * Default crop options for [ImageCropper].
      */
     fun cropOptions(
-        cropShape: CropShape = CropShape.CIRCLE,
+        cropShape: CropShape = CropShape.Original,
         contentScale: ContentScale = ContentScale.Fit,
-        gridlines: Gridlines = Gridlines.ON_TOUCH,
+        gridLinesVisibility: GridLinesVisibility = GridLinesVisibility.ON_TOUCH,
+        gridLinesType: GridLinesType = GridLinesType.GRID,
         handleRadius: Dp = 8.dp,
         touchPadding: Dp = 10.dp
     ) = CropOptions(
         cropShape = cropShape,
         contentScale = contentScale,
-        gridlines = gridlines,
+        gridLinesVisibility = gridLinesVisibility,
+        gridLinesType = gridLinesType,
         handleRadius = handleRadius,
         touchPadding = touchPadding
     )
