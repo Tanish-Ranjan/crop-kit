@@ -39,6 +39,19 @@ internal class CropStateManager(
     private val density get() = Resources.getSystem().displayMetrics.density
     private val handleRadiusPx: Float get() = handleRadius.value * density
 
+    private fun Float.safeCoerceIn(min: Float, max: Float): Float {
+    return if (min <= max) {
+        this.coerceIn(min, max)
+    } else {
+        // Handle invalid range - use the safest value
+        when {
+            this <= kotlin.math.min(min, max) -> kotlin.math.min(min, max)
+            this >= kotlin.math.max(min, max) -> kotlin.math.max(min, max)
+            else -> this
+        }
+    }
+    }
+
     init {
         reset(bitmap)
     }
@@ -140,30 +153,31 @@ internal class CropStateManager(
     }
 
     private fun moveCropRect(dragAmount: Offset) {
-
+    
         val currentRect = state.value.cropRect
         val imageRect = state.value.imageRect
-
+    
         val newLeft = (currentRect.left + dragAmount.x)
-            .coerceIn(imageRect.left, imageRect.right - currentRect.width)
+            .safeCoerceIn(imageRect.left, imageRect.right - currentRect.width)
         val newTop = (currentRect.top + dragAmount.y)
-            .coerceIn(imageRect.top, imageRect.bottom - currentRect.height)
-
+            .safeCoerceIn(imageRect.top, imageRect.bottom - currentRect.height)
+    
         val newRect = Rect(
             left = newLeft,
             top = newTop,
             right = newLeft + currentRect.width,
             bottom = newTop + currentRect.height
         )
-
+    
         _state.update {
             it.copy(
                 cropRect = newRect,
                 handles = GestureUtils.getNewHandleMeasures(newRect, handleRadiusPx)
             )
         }
-
+    
     }
+
 
     private fun dragHandles(activeHandle: DragHandle, dragAmount: Offset) {
         val adjustedDragAmount = if (cropShape is CropShape.FreeForm) {
