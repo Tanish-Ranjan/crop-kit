@@ -36,6 +36,11 @@ class CropController(
      */
     fun crop(): Bitmap = stateManager.crop()
 
+    fun cropBitmap(targetBitmap: Bitmap): Bitmap {
+        return stateManager.cropBitmap(targetBitmap)
+    }
+
+
     /**
      * Rotates the bitmap clockwise in the ImageCropper.
      */

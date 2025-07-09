@@ -39,9 +39,80 @@ internal class CropStateManager(
     private val density get() = Resources.getSystem().displayMetrics.density
     private val handleRadiusPx: Float get() = handleRadius.value * density
 
+    private fun Float.safeCoerceIn(min: Float, max: Float): Float {
+    return if (min <= max) {
+        this.coerceIn(min, max)
+    } else {
+        // Handle invalid range - use the safest value
+        when {
+            this <= kotlin.math.min(min, max) -> kotlin.math.min(min, max)
+            this >= kotlin.math.max(min, max) -> kotlin.math.max(min, max)
+            else -> this
+        }
+    }
+    }
+
+    data class CropCoordinates(
+        val x: Int,
+        val y: Int,
+        val width: Int,
+        val height: Int
+    )
+
     init {
         reset(bitmap)
     }
+
+    fun getCropCoordinates(): CropCoordinates {
+        val state = state.value
+        val bitmap = state.bitmap
+        val imageRect = state.imageRect
+        val cropRect = state.cropRect
+    
+        val scaleX = bitmap.width / imageRect.width
+        val scaleY = bitmap.height / imageRect.height
+    
+        val cropX = ((cropRect.left - imageRect.left) * scaleX).toInt()
+        val cropY = ((cropRect.top - imageRect.top) * scaleY).toInt()
+        val cropWidth = (cropRect.width * scaleX).toInt()
+        val cropHeight = (cropRect.height * scaleY).toInt()
+    
+        return CropCoordinates(
+            x = cropX.coerceIn(0, bitmap.width),
+            y = cropY.coerceIn(0, bitmap.height),
+            width = cropWidth.coerceIn(0, bitmap.width - cropX),
+            height = cropHeight.coerceIn(0, bitmap.height - cropY)
+        )
+    }
+
+    fun cropBitmap(targetBitmap: Bitmap): Bitmap {
+        val state = state.value
+        val originalBitmap = state.bitmap
+        val imageRect = state.imageRect
+        val cropRect = state.cropRect
+    
+        // Calculate scale factors between original UI bitmap and target bitmap
+        val scaleX = targetBitmap.width.toFloat() / originalBitmap.width.toFloat()
+        val scaleY = targetBitmap.height.toFloat() / originalBitmap.height.toFloat()
+    
+        // Calculate crop coordinates for target bitmap
+        val cropX = ((cropRect.left - imageRect.left) * scaleX).toInt()
+        val cropY = ((cropRect.top - imageRect.top) * scaleY).toInt()
+        val cropWidth = (cropRect.width * scaleX).toInt()
+        val cropHeight = (cropRect.height * scaleY).toInt()
+    
+        val x = cropX.coerceIn(0, targetBitmap.width)
+        val y = cropY.coerceIn(0, targetBitmap.height)
+        val width = cropWidth.coerceIn(0, targetBitmap.width - x)
+        val height = cropHeight.coerceIn(0, targetBitmap.height - y)
+    
+        return Bitmap.createBitmap(
+            targetBitmap,
+            x, y,
+            width, height
+        )
+    }
+
 
     fun updateCanvasSize(canvasSize: Size) {
         setState(canvasSize, state.value.bitmap)
@@ -140,30 +211,31 @@ internal class CropStateManager(
     }
 
     private fun moveCropRect(dragAmount: Offset) {
-
+    
         val currentRect = state.value.cropRect
         val imageRect = state.value.imageRect
-
+    
         val newLeft = (currentRect.left + dragAmount.x)
-            .coerceIn(imageRect.left, imageRect.right - currentRect.width)
+            .safeCoerceIn(imageRect.left, imageRect.right - currentRect.width)
         val newTop = (currentRect.top + dragAmount.y)
-            .coerceIn(imageRect.top, imageRect.bottom - currentRect.height)
-
+            .safeCoerceIn(imageRect.top, imageRect.bottom - currentRect.height)
+    
         val newRect = Rect(
             left = newLeft,
             top = newTop,
             right = newLeft + currentRect.width,
             bottom = newTop + currentRect.height
         )
-
+    
         _state.update {
             it.copy(
                 cropRect = newRect,
                 handles = GestureUtils.getNewHandleMeasures(newRect, handleRadiusPx)
             )
         }
-
+    
     }
+
 
     private fun dragHandles(activeHandle: DragHandle, dragAmount: Offset) {
         val adjustedDragAmount = if (cropShape is CropShape.FreeForm) {
