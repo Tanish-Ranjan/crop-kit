@@ -56,6 +56,35 @@ internal class CropStateManager(
         reset(bitmap)
     }
 
+    fun cropBitmap(targetBitmap: Bitmap): Bitmap {
+        val state = state.value
+        val originalBitmap = state.bitmap
+        val imageRect = state.imageRect
+        val cropRect = state.cropRect
+    
+        // Calculate scale factors between original UI bitmap and target bitmap
+        val scaleX = targetBitmap.width.toFloat() / originalBitmap.width.toFloat()
+        val scaleY = targetBitmap.height.toFloat() / originalBitmap.height.toFloat()
+    
+        // Calculate crop coordinates for target bitmap
+        val cropX = ((cropRect.left - imageRect.left) * scaleX).toInt()
+        val cropY = ((cropRect.top - imageRect.top) * scaleY).toInt()
+        val cropWidth = (cropRect.width * scaleX).toInt()
+        val cropHeight = (cropRect.height * scaleY).toInt()
+    
+        val x = cropX.coerceIn(0, targetBitmap.width)
+        val y = cropY.coerceIn(0, targetBitmap.height)
+        val width = cropWidth.coerceIn(0, targetBitmap.width - x)
+        val height = cropHeight.coerceIn(0, targetBitmap.height - y)
+    
+        return Bitmap.createBitmap(
+            targetBitmap,
+            x, y,
+            width, height
+        )
+    }
+
+
     fun updateCanvasSize(canvasSize: Size) {
         setState(canvasSize, state.value.bitmap)
     }
