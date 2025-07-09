@@ -37,7 +37,7 @@ class CropController(
     fun crop(): Bitmap = stateManager.crop()
 
     fun cropBitmap(targetBitmap: Bitmap): Bitmap {
-        return cropStateManager.cropBitmap(targetBitmap)
+        return stateManager.cropBitmap(targetBitmap)
     }
 
 
