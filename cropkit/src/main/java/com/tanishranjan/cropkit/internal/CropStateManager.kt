@@ -52,8 +52,37 @@ internal class CropStateManager(
     }
     }
 
+    data class CropCoordinates(
+        val x: Int,
+        val y: Int,
+        val width: Int,
+        val height: Int
+    )
+
     init {
         reset(bitmap)
+    }
+
+    fun getCropCoordinates(): CropCoordinates {
+        val state = state.value
+        val bitmap = state.bitmap
+        val imageRect = state.imageRect
+        val cropRect = state.cropRect
+    
+        val scaleX = bitmap.width / imageRect.width
+        val scaleY = bitmap.height / imageRect.height
+    
+        val cropX = ((cropRect.left - imageRect.left) * scaleX).toInt()
+        val cropY = ((cropRect.top - imageRect.top) * scaleY).toInt()
+        val cropWidth = (cropRect.width * scaleX).toInt()
+        val cropHeight = (cropRect.height * scaleY).toInt()
+    
+        return CropCoordinates(
+            x = cropX.coerceIn(0, bitmap.width),
+            y = cropY.coerceIn(0, bitmap.height),
+            width = cropWidth.coerceIn(0, bitmap.width - cropX),
+            height = cropHeight.coerceIn(0, bitmap.height - cropY)
+        )
     }
 
     fun cropBitmap(targetBitmap: Bitmap): Bitmap {
