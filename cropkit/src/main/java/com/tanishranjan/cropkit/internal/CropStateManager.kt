@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.core.graphics.scale
 import com.tanishranjan.cropkit.CropShape
 import com.tanishranjan.cropkit.GridLinesVisibility
+import com.tanishranjan.cropkit.util.Extensions.coerceInOrderAgnostic
 import com.tanishranjan.cropkit.util.Extensions.isInsideRect
 import com.tanishranjan.cropkit.util.GestureUtils
 import com.tanishranjan.cropkit.util.MathUtils
@@ -144,10 +145,14 @@ internal class CropStateManager(
         val currentRect = state.value.cropRect
         val imageRect = state.value.imageRect
 
-        val newLeft = (currentRect.left + dragAmount.x)
-            .coerceIn(imageRect.left, imageRect.right - currentRect.width)
-        val newTop = (currentRect.top + dragAmount.y)
-            .coerceIn(imageRect.top, imageRect.bottom - currentRect.height)
+        val newLeft = (currentRect.left + dragAmount.x).coerceInOrderAgnostic(
+            imageRect.left,
+            imageRect.right - currentRect.width
+        )
+        val newTop = (currentRect.top + dragAmount.y).coerceInOrderAgnostic(
+            imageRect.top,
+            imageRect.bottom - currentRect.height
+        )
 
         val newRect = Rect(
             left = newLeft,
