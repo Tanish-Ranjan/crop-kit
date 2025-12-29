@@ -50,7 +50,7 @@ internal class CropStateManager(
 
     fun crop(): Bitmap {
         val state = state.value
-        val bitmap = state.originalBitmap
+        val bitmap = state.bitmap
         val imageRect = state.imageRect
         val cropRect = state.cropRect
 
@@ -308,7 +308,7 @@ internal class CropStateManager(
             contentScale = contentScale
         )
 
-        val newBitmap = bitmap.scale(scaledSize.width.toInt(), scaledSize.height.toInt())
+        val newScaledBitmap = bitmap.scale(scaledSize.width.toInt(), scaledSize.height.toInt())
 
         val offsetX = (canvasSize.width - scaledSize.width) / 2f
         val offsetY = (canvasSize.height - scaledSize.height) / 2f
@@ -349,12 +349,13 @@ internal class CropStateManager(
         _state.update {
             it.copy(
                 canvasSize = canvasSize,
-                bitmap = newBitmap,
+                bitmap = bitmap,
+                scaledBitmap = newScaledBitmap,
                 imageRect = Rect(
                     Offset(offsetX, offsetY),
                     Size(scaledSize.width, scaledSize.height)
                 ),
-                imageBitmap = newBitmap.asImageBitmap(),
+                imageBitmap = newScaledBitmap.asImageBitmap(),
                 cropRect = cropRect,
                 handles = GestureUtils.getNewHandleMeasures(cropRect, handleRadiusPx),
                 gridlinesActive = gridLinesVisibility == GridLinesVisibility.ALWAYS,
