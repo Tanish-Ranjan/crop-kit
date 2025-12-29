@@ -33,7 +33,7 @@ internal class CropStateManager(
     private val touchPadding: Dp
 ) {
 
-    private val _state = MutableStateFlow(CropState(bitmap, bitmap))
+    private val _state = MutableStateFlow(CropState(bitmap))
     val state = _state.asStateFlow()
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private var dragMode: DragMode = DragMode.None
@@ -308,7 +308,7 @@ internal class CropStateManager(
             contentScale = contentScale
         )
 
-        val newScaledBitmap = bitmap.scale(scaledSize.width.toInt(), scaledSize.height.toInt())
+        val scaledBitmap = bitmap.scale(scaledSize.width.toInt(), scaledSize.height.toInt())
 
         val offsetX = (canvasSize.width - scaledSize.width) / 2f
         val offsetY = (canvasSize.height - scaledSize.height) / 2f
@@ -350,12 +350,11 @@ internal class CropStateManager(
             it.copy(
                 canvasSize = canvasSize,
                 bitmap = bitmap,
-                scaledBitmap = newScaledBitmap,
                 imageRect = Rect(
                     Offset(offsetX, offsetY),
                     Size(scaledSize.width, scaledSize.height)
                 ),
-                imageBitmap = newScaledBitmap.asImageBitmap(),
+                imageBitmap = scaledBitmap.asImageBitmap(),
                 cropRect = cropRect,
                 handles = GestureUtils.getNewHandleMeasures(cropRect, handleRadiusPx),
                 gridlinesActive = gridLinesVisibility == GridLinesVisibility.ALWAYS,

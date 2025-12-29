@@ -10,7 +10,6 @@ import com.tanishranjan.cropkit.HandlesRect
  * Represents the state of the crop operation.
  *
  * @param bitmap The bitmap of the image.
- * @param scaledBitmap The scaled bitmap of the image.
  * @param imageBitmap The image bitmap of the image.
  * @param cropRect The crop rectangle.
  * @param imageRect The image rectangle.
@@ -22,7 +21,6 @@ import com.tanishranjan.cropkit.HandlesRect
  */
 internal data class CropState(
     val bitmap: Bitmap,
-    val scaledBitmap: Bitmap,
     val imageBitmap: ImageBitmap? = null,
     val cropRect: Rect = Rect.Zero,
     val imageRect: Rect = Rect.Zero,
