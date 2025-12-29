@@ -20,6 +20,7 @@ import com.tanishranjan.cropkit.HandlesRect
  * @param aspectRatio The aspect ratio of the crop rectangle.
  */
 internal data class CropState(
+    val originalBitmap: Bitmap,
     val bitmap: Bitmap,
     val imageBitmap: ImageBitmap? = null,
     val cropRect: Rect = Rect.Zero,

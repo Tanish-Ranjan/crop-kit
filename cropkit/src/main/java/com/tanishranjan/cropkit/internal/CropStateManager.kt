@@ -33,7 +33,7 @@ internal class CropStateManager(
     private val touchPadding: Dp
 ) {
 
-    private val _state = MutableStateFlow(CropState(bitmap))
+    private val _state = MutableStateFlow(CropState(bitmap, bitmap))
     val state = _state.asStateFlow()
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private var dragMode: DragMode = DragMode.None
@@ -49,9 +49,8 @@ internal class CropStateManager(
     }
 
     fun crop(): Bitmap {
-
         val state = state.value
-        val bitmap = state.bitmap
+        val bitmap = state.originalBitmap
         val imageRect = state.imageRect
         val cropRect = state.cropRect
 
