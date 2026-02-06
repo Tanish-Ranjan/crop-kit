@@ -4,8 +4,71 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import com.tanishranjan.cropkit.internal.DragHandle
 import com.tanishranjan.cropkit.HandlesRect
+import com.tanishranjan.cropkit.internal.DragHandle.*
+import com.tanishranjan.cropkit.util.Extensions.coerceInOrderAgnostic
+import kotlin.math.abs
 
 internal object GestureUtils {
+    /**
+     * Get the offset of a handle based on its type and the crop rectangle.
+     *
+     * @param activeHandle The handle type.
+     * @param cropRect The current crop rectangle.
+     * @return The offset of the handle.
+     */
+    fun getHandleOffset(
+        activeHandle: DragHandle,
+        cropRect: Rect
+    ): Offset =
+        when (activeHandle) {
+            TopLeft -> Offset(cropRect.left, cropRect.top)
+            TopRight -> Offset(cropRect.right, cropRect.top)
+            BottomLeft -> Offset(cropRect.left, cropRect.bottom)
+            BottomRight -> Offset(cropRect.right, cropRect.bottom)
+            Left -> Offset(cropRect.left, 0f)
+            Right -> Offset(cropRect.right, 0f)
+            Top -> Offset(0f, cropRect.top)
+            Bottom -> Offset(0f, cropRect.bottom)
+        }
+
+    /**
+     * Correct the drag amount based on the drag offset.
+     *
+     * @param dragOffset The current drag offset.
+     * @param dragAmount The original drag amount.
+     * @return The corrected drag amount.
+     */
+    fun getCorrectDragAmount(
+        dragOffset: Offset,
+        dragAmount: Offset
+    ): Offset = Offset(dragOffset.x + dragAmount.x, dragOffset.y + dragAmount.y)
+
+    /**
+     * Main entry point to calculate the new crop rectangle.
+     * Decides whether to use Free or Locked logic based on the [aspectRatio].
+     *
+     * @param activeHandle The handle that is currently being dragged.
+     * @param handleOffset The offset by which the handle is dragged.
+     * @param imageRect The current image rect.
+     * @param cropRect The current crop rect.
+     * @param minCropSize The minimum size of crop rectangle that should be maintained.
+     * @param aspectRatio The desired aspect ratio (width / height).
+     * @return The new crop rectangle if the drag is valid, null otherwise.
+     */
+    fun calculateNewCropRect(
+        activeHandle: DragHandle,
+        handleOffset: Offset,
+        imageRect: Rect,
+        cropRect: Rect,
+        minCropSize: Float,
+        aspectRatio: Float
+    ): Rect =
+        if (aspectRatio > 0f) getNewRectMeasuresLocked(
+            activeHandle, handleOffset, imageRect, cropRect, minCropSize, aspectRatio
+        )
+        else getNewRectMeasures(
+            activeHandle, handleOffset, imageRect, cropRect, minCropSize
+        )
 
     /**
      * Calculate the new crop rectangle based on the drag amount and the active handle.
@@ -15,7 +78,6 @@ internal object GestureUtils {
      * @param imageRect The current image rect.
      * @param cropRect The current crop rect.
      * @param minCropSize The minimum size of crop rectangle that should be maintained.
-     *
      * @return The new crop rectangle if the drag is valid, null otherwise.
      */
     fun getNewRectMeasures(
@@ -24,117 +86,211 @@ internal object GestureUtils {
         imageRect: Rect,
         cropRect: Rect,
         minCropSize: Float
-    ): Rect? {
-        return when (activeHandle) {
-
-            DragHandle.TopLeft -> {
-                val newOffset = cropRect.topLeft + dragAmount
-                if (newOffset.x !in imageRect.left..cropRect.right - minCropSize
-                    || newOffset.y !in imageRect.top..cropRect.bottom - minCropSize
-                ) return null
-                Rect(
-                    left = newOffset.x,
-                    top = newOffset.y,
-                    right = cropRect.right,
-                    bottom = cropRect.bottom
-                )
-            }
-
-            DragHandle.TopRight -> {
-                val newOffset = cropRect.topRight + dragAmount
-                if (newOffset.x !in cropRect.left + minCropSize..imageRect.right
-                    || newOffset.y !in imageRect.top..cropRect.bottom - minCropSize
-                ) return cropRect
-                Rect(
-                    left = cropRect.left,
-                    top = newOffset.y,
-                    right = newOffset.x,
-                    bottom = cropRect.bottom
-                )
-            }
-
-            DragHandle.BottomLeft -> {
-                val newOffset = cropRect.bottomLeft + dragAmount
-                if (newOffset.x !in imageRect.left..cropRect.right - minCropSize
-                    || newOffset.y !in cropRect.top + minCropSize..imageRect.bottom
-                ) return cropRect
-                Rect(
-                    left = newOffset.x,
-                    top = cropRect.top,
-                    right = cropRect.right,
-                    bottom = newOffset.y
-                )
-            }
-
-            DragHandle.BottomRight -> {
-                val newOffset = cropRect.bottomRight + dragAmount
-                if (newOffset.x !in cropRect.left + minCropSize..imageRect.right
-                    || newOffset.y !in cropRect.top + minCropSize..imageRect.bottom
-                ) return cropRect
-                Rect(
-                    left = cropRect.left,
-                    top = cropRect.top,
-                    right = newOffset.x,
-                    bottom = newOffset.y
-                )
-            }
-
-            DragHandle.Top -> {
-                val newOffset = cropRect.topLeft + dragAmount
-                val newTop = newOffset.y.coerceIn(
-                    imageRect.top,
-                    cropRect.bottom - minCropSize
-                )
-                Rect(
-                    left = cropRect.left,
-                    top = newTop,
-                    right = cropRect.right,
-                    bottom = cropRect.bottom
-                )
-            }
-
-            DragHandle.Bottom -> {
-                val newOffset = cropRect.bottomLeft + dragAmount
-                val newBottom = newOffset.y.coerceIn(
-                    cropRect.top + minCropSize,
-                    imageRect.bottom
-                )
-                Rect(
-                    left = cropRect.left,
-                    top = cropRect.top,
-                    right = cropRect.right,
-                    bottom = newBottom
-                )
-            }
-
-            DragHandle.Left -> {
-                val newOffset = cropRect.bottomLeft + dragAmount
-                val newLeft = newOffset.x.coerceIn(
-                    imageRect.left,
-                    cropRect.right - minCropSize
-                )
-                Rect(
-                    left = newLeft,
-                    top = cropRect.top,
-                    right = cropRect.right,
-                    bottom = cropRect.bottom
-                )
-            }
-
-            DragHandle.Right -> {
-                val newOffset = cropRect.topRight + dragAmount
-                val newRight = newOffset.x.coerceIn(
-                    cropRect.left + minCropSize,
-                    imageRect.right
-                )
-                Rect(
-                    left = cropRect.left,
-                    top = cropRect.top,
-                    right = newRight,
-                    bottom = cropRect.bottom
-                )
-            }
+    ): Rect = when (activeHandle) {
+        TopLeft -> {
+            val newLeft = dragAmount.x.coerceInOrderAgnostic(
+                imageRect.left,
+                cropRect.right - minCropSize
+            )
+            val newTop = dragAmount.y.coerceInOrderAgnostic(
+                imageRect.top,
+                cropRect.bottom - minCropSize
+            )
+            Rect(
+                left = newLeft,
+                top = newTop,
+                right = cropRect.right,
+                bottom = cropRect.bottom
+            )
         }
+
+        TopRight -> {
+            val newRight = dragAmount.x.coerceInOrderAgnostic(
+                cropRect.left + minCropSize,
+                imageRect.right
+            )
+            val newTop = dragAmount.y.coerceInOrderAgnostic(
+                imageRect.top,
+                cropRect.bottom - minCropSize
+            )
+            Rect(
+                left = cropRect.left,
+                top = newTop,
+                right = newRight,
+                bottom = cropRect.bottom
+            )
+        }
+
+        BottomLeft -> {
+            val newLeft = dragAmount.x.coerceInOrderAgnostic(
+                imageRect.left,
+                cropRect.right - minCropSize
+            )
+            val newBottom = dragAmount.y.coerceInOrderAgnostic(
+                cropRect.top + minCropSize,
+                imageRect.bottom
+            )
+            Rect(
+                left = newLeft,
+                top = cropRect.top,
+                right = cropRect.right,
+                bottom = newBottom
+            )
+        }
+
+        BottomRight -> {
+            val newRight = dragAmount.x.coerceInOrderAgnostic(
+                cropRect.left + minCropSize,
+                imageRect.right
+            )
+            val newBottom = dragAmount.y.coerceInOrderAgnostic(
+                cropRect.top + minCropSize,
+                imageRect.bottom
+            )
+            Rect(
+                left = cropRect.left,
+                top = cropRect.top,
+                right = newRight,
+                bottom = newBottom
+            )
+        }
+
+        Top -> {
+            val newTop = dragAmount.y.coerceInOrderAgnostic(
+                imageRect.top,
+                cropRect.bottom - minCropSize
+            )
+            Rect(
+                left = cropRect.left,
+                top = newTop,
+                right = cropRect.right,
+                bottom = cropRect.bottom
+            )
+        }
+
+        Bottom -> {
+            val newBottom = dragAmount.y.coerceInOrderAgnostic(
+                cropRect.top + minCropSize,
+                imageRect.bottom
+            )
+            Rect(
+                left = cropRect.left,
+                top = cropRect.top,
+                right = cropRect.right,
+                bottom = newBottom
+            )
+        }
+
+        Left -> {
+            val newLeft = dragAmount.x.coerceInOrderAgnostic(
+                imageRect.left,
+                cropRect.right - minCropSize
+            )
+            Rect(
+                left = newLeft,
+                top = cropRect.top,
+                right = cropRect.right,
+                bottom = cropRect.bottom
+            )
+        }
+
+        Right -> {
+            val newRight = dragAmount.x.coerceInOrderAgnostic(
+                cropRect.left + minCropSize,
+                imageRect.right
+            )
+            Rect(
+                left = cropRect.left,
+                top = cropRect.top,
+                right = newRight,
+                bottom = cropRect.bottom
+            )
+        }
+    }
+
+    /**
+     * Calculates the new crop rectangle with locked Aspect Ratio.
+     * It projects the user's gesture onto the aspect ratio diagonal, ensuring the
+     * rectangle grows/shrinks naturally while staying within image bounds.
+     *
+     * @param activeHandle The handle that is currently being dragged.
+     * @param handleOffset The offset by which the handle is dragged.
+     * @param imageRect The current image rect.
+     * @param cropRect The current crop rect.
+     * @param minCropSize The minimum size of crop rectangle that should be maintained.
+     * @param aspectRatio The desired aspect ratio (width / height).
+     * @return The new crop rectangle if the drag is valid, null otherwise.
+     */
+    fun getNewRectMeasuresLocked(
+        activeHandle: DragHandle,
+        handleOffset: Offset,
+        imageRect: Rect,
+        cropRect: Rect,
+        minCropSize: Float,
+        aspectRatio: Float
+    ): Rect {
+        val pivot = when (activeHandle) {
+            TopLeft -> Offset(cropRect.right, cropRect.bottom)
+            TopRight -> Offset(cropRect.left, cropRect.bottom)
+            BottomLeft -> Offset(cropRect.right, cropRect.top)
+            BottomRight -> Offset(cropRect.left, cropRect.top)
+            else -> return cropRect
+        }
+
+        // Calculate raw distances from the pivot to the target finger position
+        val distanceX = abs(handleOffset.x - pivot.x)
+        val distanceY = abs(handleOffset.y - pivot.y)
+
+        // Generate Candidates (Projections)
+        val widthBasedOnX = distanceX.coerceAtLeast(minCropSize)
+        val heightDerivedFromX = widthBasedOnX / aspectRatio
+
+        val heightBasedOnY = distanceY.coerceAtLeast(minCropSize)
+        val widthDerivedFromY = heightBasedOnY * aspectRatio
+
+        // We pick the candidate that produces the smallest rectangle
+        var finalWidth = if (widthBasedOnX < widthDerivedFromY)
+            widthBasedOnX else widthDerivedFromY
+        var finalHeight = if (widthBasedOnX < widthDerivedFromY)
+            heightDerivedFromX else heightBasedOnY
+
+
+        // Bounds Constraint
+        // Determine the direction of growth relative to the pivot (-1 for Left/Up, 1 for Right/Down)
+        val directionX = if (handleOffset.x < pivot.x) -1f else 1f
+        val directionY = if (handleOffset.y < pivot.y) -1f else 1f
+
+        // Check Horizontal Bounds
+        val proposedLeft = if (directionX < 0) pivot.x - finalWidth else pivot.x
+        val proposedRight = if (directionX < 0) pivot.x else pivot.x + finalWidth
+
+        if (proposedLeft < imageRect.left || proposedRight > imageRect.right) {
+            val maxWidthAvailable = if (directionX < 0) (pivot.x - imageRect.left)
+            else (imageRect.right - pivot.x)
+
+            finalWidth = maxWidthAvailable
+            finalHeight = finalWidth / aspectRatio
+        }
+
+        // Check Vertical Bounds
+        val proposedTop = if (directionY < 0) pivot.y - finalHeight else pivot.y
+        val proposedBottom = if (directionY < 0) pivot.y else pivot.y + finalHeight
+
+        if (proposedTop < imageRect.top || proposedBottom > imageRect.bottom) {
+            val maxHeightAvailable = if (directionY < 0) (pivot.y - imageRect.top)
+            else (imageRect.bottom - pivot.y)
+
+            finalHeight = maxHeightAvailable
+            finalWidth = finalHeight * aspectRatio
+        }
+
+
+        return Rect(
+            left = if (directionX < 0) pivot.x - finalWidth else pivot.x,
+            top = if (directionY < 0) pivot.y - finalHeight else pivot.y,
+            right = if (directionX < 0) pivot.x else pivot.x + finalWidth,
+            bottom = if (directionY < 0) pivot.y else pivot.y + finalHeight
+        )
     }
 
     /**
@@ -233,5 +389,4 @@ internal object GestureUtils {
         )
 
     }
-
 }

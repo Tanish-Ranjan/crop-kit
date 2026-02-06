@@ -16,7 +16,7 @@ object CropDefaults {
         gridLinesVisibility: GridLinesVisibility = GridLinesVisibility.ON_TOUCH,
         gridLinesType: GridLinesType = GridLinesType.GRID,
         handleRadius: Dp = 8.dp,
-        touchPadding: Dp = 10.dp
+        touchPadding: Dp = 20.dp
     ) = CropOptions(
         cropShape = cropShape,
         contentScale = contentScale,

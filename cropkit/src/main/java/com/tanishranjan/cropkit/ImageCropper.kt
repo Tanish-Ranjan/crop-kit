@@ -203,9 +203,7 @@ fun ImageCropper(
                         style = Fill
                     )
                 }
-
             }
-
         }
     }
 
