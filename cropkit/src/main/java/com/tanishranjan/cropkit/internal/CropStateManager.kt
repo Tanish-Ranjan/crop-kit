@@ -31,13 +31,13 @@ internal class CropStateManager(
     private val handleRadius: Dp,
     private val touchPadding: Dp
 ) {
-
     private val _state = MutableStateFlow(CropState(bitmap))
     val state = _state.asStateFlow()
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private var dragMode: DragMode = DragMode.None
     private val density get() = Resources.getSystem().displayMetrics.density
     private val handleRadiusPx: Float get() = handleRadius.value * density
+    private var dragOffset: Offset = Offset.Zero
 
     init {
         reset(bitmap)
@@ -85,7 +85,7 @@ internal class CropStateManager(
             else -> DragMode.None
         }
 
-        val dragOffset = when (val mode = dragMode) {
+        dragOffset = when (val mode = dragMode) {
             DragMode.None -> Offset.Zero
             DragMode.Move -> Offset(currentRect.left, currentRect.top)
             is DragMode.Handle -> GestureUtils.getHandleOffset(mode.handle, currentRect)
@@ -93,7 +93,6 @@ internal class CropStateManager(
 
         _state.update { cropState ->
             cropState.copy(
-                dragOffset = dragOffset,
                 isDragging = dragMode != DragMode.None,
                 gridlinesActive = if (gridLinesVisibility == GridLinesVisibility.ON_TOUCH) {
                     dragMode != DragMode.None
@@ -149,7 +148,7 @@ internal class CropStateManager(
         val imageRect = state.value.imageRect
 
         val correctedDragAmount = GestureUtils.getCorrectDragAmount(
-            dragOffset = state.value.dragOffset,
+            dragOffset = dragOffset,
             dragAmount = dragAmount
         )
 
@@ -170,8 +169,8 @@ internal class CropStateManager(
         )
 
         _state.update {
+            dragOffset = correctedDragAmount
             it.copy(
-                dragOffset = correctedDragAmount,
                 cropRect = newRect,
                 handles = GestureUtils.getNewHandleMeasures(newRect, handleRadiusPx)
             )
@@ -180,7 +179,7 @@ internal class CropStateManager(
 
     private fun moveDragHandle(activeHandle: DragHandle, dragAmount: Offset) {
         val correctedDragAmount = GestureUtils.getCorrectDragAmount(
-            dragOffset = state.value.dragOffset,
+            dragOffset = dragOffset,
             dragAmount = dragAmount
         )
 
@@ -193,8 +192,8 @@ internal class CropStateManager(
             aspectRatio = state.value.aspectRatio
         ).let { newRect ->
             _state.update {
+                dragOffset = correctedDragAmount
                 it.copy(
-                    dragOffset = correctedDragAmount,
                     cropRect = newRect,
                     handles = GestureUtils.getNewHandleMeasures(
                         newRect,

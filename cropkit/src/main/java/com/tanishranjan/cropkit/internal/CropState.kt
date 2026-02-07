@@ -1,7 +1,6 @@
 package com.tanishranjan.cropkit.internal
 
 import android.graphics.Bitmap
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ImageBitmap
@@ -12,7 +11,6 @@ import com.tanishranjan.cropkit.HandlesRect
  *
  * @param bitmap The bitmap of the image.
  * @param imageBitmap The image bitmap of the image.
- * @param dragOffset The offset of the drag.
  * @param cropRect The crop rectangle.
  * @param imageRect The image rectangle.
  * @param handles The handles rectangles of the crop rectangle.
@@ -24,7 +22,6 @@ import com.tanishranjan.cropkit.HandlesRect
 internal data class CropState(
     val bitmap: Bitmap,
     val imageBitmap: ImageBitmap? = null,
-    val dragOffset: Offset = Offset.Zero,
     val cropRect: Rect = Rect.Zero,
     val imageRect: Rect = Rect.Zero,
     val handles: HandlesRect = HandlesRect(),
