@@ -237,15 +237,40 @@ internal object GestureUtils {
             else -> return cropRect
         }
 
-        // Calculate raw distances from the pivot to the target finger position
-        val distanceX = abs(handleOffset.x - pivot.x)
-        val distanceY = abs(handleOffset.y - pivot.y)
+        // Pre-calculate minimum limits based on the Aspect Ratio
+        val minWidth: Float
+        val minHeight: Float
+
+        if (aspectRatio >= 1f) {
+            minHeight = minCropSize
+            minWidth = minHeight * aspectRatio
+        } else {
+            minWidth = minCropSize
+            minHeight = minWidth / aspectRatio
+        }
+
+        // Constrain the Handle Offset
+        val constrainedX = when (activeHandle) {
+            TopLeft, BottomLeft -> handleOffset.x.coerceAtMost(pivot.x - minWidth)
+            TopRight, BottomRight -> handleOffset.x.coerceAtLeast(pivot.x + minWidth)
+            else -> handleOffset.x
+        }
+
+        val constrainedY = when (activeHandle) {
+            TopLeft, TopRight -> handleOffset.y.coerceAtMost(pivot.y - minHeight)
+            BottomLeft, BottomRight -> handleOffset.y.coerceAtLeast(pivot.y + minHeight)
+            else -> handleOffset.y
+        }
+
+        // Calculate distances using the CONSTRAINED position
+        val distanceX = abs(constrainedX - pivot.x)
+        val distanceY = abs(constrainedY - pivot.y)
 
         // Generate Candidates (Projections)
-        val widthBasedOnX = distanceX.coerceAtLeast(minCropSize)
+        val widthBasedOnX = distanceX.coerceAtLeast(minWidth)
         val heightDerivedFromX = widthBasedOnX / aspectRatio
 
-        val heightBasedOnY = distanceY.coerceAtLeast(minCropSize)
+        val heightBasedOnY = distanceY.coerceAtLeast(minHeight)
         val widthDerivedFromY = heightBasedOnY * aspectRatio
 
         // We pick the candidate that produces the smallest rectangle
@@ -254,19 +279,19 @@ internal object GestureUtils {
         var finalHeight = if (widthBasedOnX < widthDerivedFromY)
             heightDerivedFromX else heightBasedOnY
 
-
         // Bounds Constraint
         // Determine the direction of growth relative to the pivot (-1 for Left/Up, 1 for Right/Down)
-        val directionX = if (handleOffset.x < pivot.x) -1f else 1f
-        val directionY = if (handleOffset.y < pivot.y) -1f else 1f
+        val directionX = if (activeHandle == TopRight || activeHandle == BottomRight) 1f else -1f
+        val directionY = if (activeHandle == BottomLeft || activeHandle == BottomRight) 1f else -1f
 
         // Check Horizontal Bounds
         val proposedLeft = if (directionX < 0) pivot.x - finalWidth else pivot.x
         val proposedRight = if (directionX < 0) pivot.x else pivot.x + finalWidth
 
         if (proposedLeft < imageRect.left || proposedRight > imageRect.right) {
-            val maxWidthAvailable = if (directionX < 0) (pivot.x - imageRect.left)
-            else (imageRect.right - pivot.x)
+            val maxWidthAvailable =
+                if (directionX < 0) (pivot.x - imageRect.left)
+                else (imageRect.right - pivot.x)
 
             finalWidth = maxWidthAvailable
             finalHeight = finalWidth / aspectRatio
@@ -283,7 +308,6 @@ internal object GestureUtils {
             finalHeight = maxHeightAvailable
             finalWidth = finalHeight * aspectRatio
         }
-
 
         return Rect(
             left = if (directionX < 0) pivot.x - finalWidth else pivot.x,
