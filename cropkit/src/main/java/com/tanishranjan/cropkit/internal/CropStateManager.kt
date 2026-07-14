@@ -300,18 +300,25 @@ internal class CropStateManager(
         val imageWidth = bitmap.width.toFloat()
         val imageHeight = bitmap.height.toFloat()
 
+        // Add content padding equal to touchPadding so handles at edges
+        // always have their full touch area within the canvas bounds
+        val contentPadding = touchPadding.value * density
+        val availableWidth = canvasSize.width - contentPadding * 2
+        val availableHeight = canvasSize.height - contentPadding * 2
+
         val scaledSize = MathUtils.calculateScaledSize(
             srcWidth = imageWidth,
             srcHeight = imageHeight,
-            dstWidth = canvasSize.width,
-            dstHeight = canvasSize.height,
+            dstWidth = availableWidth,
+            dstHeight = availableHeight,
             contentScale = contentScale
         )
 
         val scaledBitmap = bitmap.scale(scaledSize.width.toInt(), scaledSize.height.toInt())
 
-        val offsetX = (canvasSize.width - scaledSize.width) / 2f
-        val offsetY = (canvasSize.height - scaledSize.height) / 2f
+        // Center within available space, then add padding offset
+        val offsetX = contentPadding + (availableWidth - scaledSize.width) / 2f
+        val offsetY = contentPadding + (availableHeight - scaledSize.height) / 2f
 
         val aspectRatio = when (cropShape) {
             is CropShape.FreeForm -> null
