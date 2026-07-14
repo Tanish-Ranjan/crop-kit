@@ -64,5 +64,4 @@ class CropController(
             is CropStateChangeActions.CanvasSizeChanged -> stateManager.updateCanvasSize(action.size)
         }
     }
-
 }
