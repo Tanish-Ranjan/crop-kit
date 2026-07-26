@@ -190,9 +190,9 @@ fun ImageCropper(
 
                 // Draw edge handles only for free form cropping only
                 val handles = if (cropOptions.cropShape is CropShape.FreeForm) {
-                    state.handles.getAllHandles()
+                    state.handles.allHandles
                 } else {
-                    state.handles.getCornerHandles()
+                    state.handles.cornerHandles
                 }
 
                 handles.forEach { handle ->
