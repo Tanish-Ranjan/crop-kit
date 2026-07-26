@@ -181,7 +181,8 @@ internal class CropStateManager(
             dragAmount = adjustedDragAmount,
             imageRect = state.value.imageRect,
             cropRect = state.value.cropRect,
-            minCropSize = MIN_CROP_SIZE
+            minCropSize = MIN_CROP_SIZE,
+            aspectRatio = state.value.aspectRatio
         )?.let { newRect ->
             _state.update {
                 it.copy(
@@ -251,18 +252,14 @@ internal class CropStateManager(
                 }
             }
 
-            else -> Offset.Zero
+            DragHandle.Top, DragHandle.Bottom,
+            DragHandle.Left, DragHandle.Right -> dragAmount
         }
 
     }
 
     private fun findActiveHandle(offset: Offset): DragHandle? {
-        // TODO: Allow cropping with all handles in locked aspect ratios
-        val handles = if (cropShape is CropShape.FreeForm) {
-            state.value.handles.getAllNamedHandles()
-        } else {
-            state.value.handles.getCornerNamedHandles()
-        }
+        val handles = state.value.handles.getAllNamedHandles()
 
         handles.forEach { (handle, handleType) ->
             val padding = touchPadding.value * density
