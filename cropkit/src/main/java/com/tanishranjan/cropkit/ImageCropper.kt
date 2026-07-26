@@ -64,6 +64,8 @@ fun ImageCropper(
         label = "overlay"
     )
 
+    val clipPath = remember { Path() }
+
     key(cropController) {
         Box(modifier = modifier) {
 
@@ -88,6 +90,9 @@ fun ImageCropper(
                         cropController.onStateChange(CropStateChangeActions.CanvasSizeChanged(size.toSize()))
                     }
             ) {
+                val strokeWidth1Px = 1.dp.toPx()
+                val strokeWidth2Px = 2.dp.toPx()
+                val gridLinesType = cropOptions.gridLinesType
 
                 state.imageBitmap?.let {
                     // Image
@@ -97,13 +102,16 @@ fun ImageCropper(
                     )
 
                     // Dark overlay outside crop area
+                    clipPath.reset()
+                    when (gridLinesType) {
+                        GridLinesType.CIRCLE, GridLinesType.GRID_AND_CIRCLE -> clipPath.addOval(
+                            state.cropRect
+                        )
+
+                        else -> clipPath.addRect(state.cropRect)
+                    }
                     clipPath(
-                        path = Path().apply {
-                            when (cropOptions.gridLinesType) {
-                                GridLinesType.CIRCLE, GridLinesType.GRID_AND_CIRCLE -> addOval(state.cropRect)
-                                else -> addRect(state.cropRect)
-                            }
-                        },
+                        path = clipPath,
                         clipOp = ClipOp.Difference
                     ) {
                         drawRect(
@@ -121,16 +129,14 @@ fun ImageCropper(
                     color = cropColors.cropRectangle,
                     topLeft = cropRect.topLeft,
                     size = cropRect.size,
-                    style = Stroke(width = 2.dp.toPx())
+                    style = Stroke(width = strokeWidth2Px)
                 )
 
                 // Gridlines
                 if (state.gridlinesActive) {
 
-                    if (cropOptions.gridLinesType in listOf(
-                            GridLinesType.GRID,
-                            GridLinesType.GRID_AND_CIRCLE
-                        )
+                    if (gridLinesType == GridLinesType.GRID
+                        || gridLinesType == GridLinesType.GRID_AND_CIRCLE
                     ) {
                         val thirdWidth = cropRect.width / 3
                         val thirdHeight = cropRect.height / 3
@@ -141,7 +147,7 @@ fun ImageCropper(
                                 color = cropColors.gridlines,
                                 start = Offset(cropRect.left + thirdWidth * i, cropRect.top),
                                 end = Offset(cropRect.left + thirdWidth * i, cropRect.bottom),
-                                strokeWidth = 1.dp.toPx()
+                                strokeWidth = strokeWidth1Px
                             )
                         }
 
@@ -151,31 +157,29 @@ fun ImageCropper(
                                 color = cropColors.gridlines,
                                 start = Offset(cropRect.left, cropRect.top + thirdHeight * i),
                                 end = Offset(cropRect.right, cropRect.top + thirdHeight * i),
-                                strokeWidth = 1.dp.toPx()
+                                strokeWidth = strokeWidth1Px
                             )
                         }
                     }
 
-                    if (cropOptions.gridLinesType in listOf(
-                            GridLinesType.CIRCLE,
-                            GridLinesType.GRID_AND_CIRCLE
-                        )
+                    if (gridLinesType == GridLinesType.CIRCLE
+                        || gridLinesType == GridLinesType.GRID_AND_CIRCLE
                     ) {
                         drawOval(
                             color = cropColors.gridlines,
                             topLeft = cropRect.topLeft,
                             size = cropRect.size,
-                            style = Stroke(width = 1.dp.toPx())
+                            style = Stroke(width = strokeWidth1Px)
                         )
                     }
 
-                    if (cropOptions.gridLinesType == GridLinesType.CROSSHAIR) {
+                    if (gridLinesType == GridLinesType.CROSSHAIR) {
                         // Vertical crosshair
                         drawLine(
                             color = cropColors.gridlines,
                             start = Offset(cropRect.left + cropRect.width / 2, cropRect.top),
                             end = Offset(cropRect.left + cropRect.width / 2, cropRect.bottom),
-                            strokeWidth = 1.dp.toPx()
+                            strokeWidth = strokeWidth1Px
                         )
 
                         // Horizontal crosshair
@@ -183,7 +187,7 @@ fun ImageCropper(
                             color = cropColors.gridlines,
                             start = Offset(cropRect.left, cropRect.top + cropRect.height / 2),
                             end = Offset(cropRect.right, cropRect.top + cropRect.height / 2),
-                            strokeWidth = 1.dp.toPx()
+                            strokeWidth = strokeWidth1Px
                         )
                     }
                 }
