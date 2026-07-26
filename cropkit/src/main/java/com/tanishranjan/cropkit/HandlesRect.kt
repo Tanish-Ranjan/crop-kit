@@ -15,7 +15,7 @@ import com.tanishranjan.cropkit.internal.DragHandle
  * @param right The right handle.
  * @param left The left handle.
  */
-data class HandlesRect(
+internal data class HandlesRect(
     val topLeft: Rect = Rect.Zero,
     val topRight: Rect = Rect.Zero,
     val bottomLeft: Rect = Rect.Zero,
@@ -26,25 +26,16 @@ data class HandlesRect(
     val left: Rect = Rect.Zero
 ) {
 
-    /**
-     * Returns the corner handles of the crop rectangle.
-     */
-    fun getCornerHandles(): List<Rect> {
-        return listOf(topLeft, topRight, bottomLeft, bottomRight)
+    val cornerHandles: List<Rect> by lazy {
+        listOf(topLeft, topRight, bottomLeft, bottomRight)
     }
 
-    /**
-     * Returns corner and side handles of the crop rectangle.
-     */
-    fun getAllHandles(): List<Rect> {
-        return listOf(topLeft, topRight, bottomLeft, bottomRight, top, bottom, right, left)
+    val allHandles: List<Rect> by lazy {
+        listOf(topLeft, topRight, bottomLeft, bottomRight, top, bottom, right, left)
     }
 
-    /**
-     * Returns the corner handles of the crop rectangle along with their names.
-     */
-    internal fun getCornerNamedHandles(): List<Pair<Rect, DragHandle>> {
-        return listOf(
+    val cornerNamedHandles: List<Pair<Rect, DragHandle>> by lazy {
+        listOf(
             topLeft to DragHandle.TopLeft,
             topRight to DragHandle.TopRight,
             bottomLeft to DragHandle.BottomLeft,
@@ -52,11 +43,8 @@ data class HandlesRect(
         )
     }
 
-    /**
-     * Returns corner and side handles of the crop rectangle along with their names.
-     */
-    internal fun getAllNamedHandles(): List<Pair<Rect, DragHandle>> {
-        return listOf(
+    val allNamedHandles: List<Pair<Rect, DragHandle>> by lazy {
+        listOf(
             topLeft to DragHandle.TopLeft,
             topRight to DragHandle.TopRight,
             bottomLeft to DragHandle.BottomLeft,

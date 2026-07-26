@@ -3,7 +3,7 @@ package com.tanishranjan.cropkit.internal
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 
-interface CropStateChangeActions {
+sealed interface CropStateChangeActions {
 
     data class DragStart(val offset: Offset) : CropStateChangeActions
     data object DragEnd : CropStateChangeActions

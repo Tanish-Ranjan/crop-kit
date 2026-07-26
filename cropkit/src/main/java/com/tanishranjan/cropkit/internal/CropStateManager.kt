@@ -259,9 +259,9 @@ internal class CropStateManager(
     private fun findActiveHandle(offset: Offset): DragHandle? {
         // TODO: Allow cropping with all handles in locked aspect ratios
         val handles = if (cropShape is CropShape.FreeForm) {
-            state.value.handles.getAllNamedHandles()
+            state.value.handles.allNamedHandles
         } else {
-            state.value.handles.getCornerNamedHandles()
+            state.value.handles.cornerNamedHandles
         }
 
         handles.forEach { (handle, handleType) ->
