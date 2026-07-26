@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -35,8 +36,14 @@ fun rememberCropController(
     bitmap: Bitmap,
     cropOptions: CropOptions = CropDefaults.cropOptions(),
     cropColors: CropColors = CropDefaults.cropColors()
-): CropController = remember(bitmap, cropOptions, cropColors) {
-    CropController(bitmap, cropOptions, cropColors)
+): CropController {
+    val controller = remember(bitmap, cropOptions, cropColors) {
+        CropController(bitmap, cropOptions, cropColors)
+    }
+    DisposableEffect(controller) {
+        onDispose { controller.close() }
+    }
+    return controller
 }
 
 /**
