@@ -41,6 +41,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,6 +55,7 @@ import com.tanishranjan.cropkit.GridLinesType
 import com.tanishranjan.cropkit.ImageCropper
 import com.tanishranjan.cropkit.rememberCropController
 import com.tanishranjan.cropkit_demo.ui.theme.CropKitTheme
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -79,6 +81,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                val coroutineScope = rememberCoroutineScope()
                 val context = LocalContext.current
                 val imagePicker = rememberLauncherForActivityResult(
                     ActivityResultContracts.PickVisualMedia()
@@ -96,8 +99,10 @@ class MainActivity : ComponentActivity() {
                             actions = {
                                 IconButton(
                                     onClick = {
-                                        cropController?.crop()?.let {
-                                            saveImage(context, it)
+                                        cropController?.let { controller ->
+                                            coroutineScope.launch {
+                                                saveImage(context, controller.crop())
+                                            }
                                         }
                                     }
                                 ) {
@@ -207,7 +212,7 @@ class MainActivity : ComponentActivity() {
 
                                         IconButton(
                                             onClick = {
-                                                cropController.rotateAntiClockwise()
+                                                coroutineScope.launch { cropController.rotateAntiClockwise() }
                                             }
                                         ) {
                                             Icon(
@@ -218,7 +223,7 @@ class MainActivity : ComponentActivity() {
 
                                         IconButton(
                                             onClick = {
-                                                cropController.rotateClockwise()
+                                                coroutineScope.launch { cropController.rotateClockwise() }
                                             }
                                         ) {
                                             Icon(
@@ -229,7 +234,7 @@ class MainActivity : ComponentActivity() {
 
                                         IconButton(
                                             onClick = {
-                                                cropController.flipVertically()
+                                                coroutineScope.launch { cropController.flipVertically() }
                                             }
                                         ) {
                                             Icon(
@@ -240,7 +245,7 @@ class MainActivity : ComponentActivity() {
 
                                         IconButton(
                                             onClick = {
-                                                cropController.flipHorizontally()
+                                                coroutineScope.launch { cropController.flipHorizontally() }
                                             }
                                         ) {
                                             Icon(

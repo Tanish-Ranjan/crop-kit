@@ -34,27 +34,27 @@ class CropController(
     /**
      * Returns the cropped bitmap.
      */
-    fun crop(): Bitmap = stateManager.crop()
+    suspend fun crop(): Bitmap = stateManager.crop()
 
     /**
      * Rotates the bitmap clockwise in the ImageCropper.
      */
-    fun rotateClockwise() = stateManager.rotateClockwise()
+    suspend fun rotateClockwise() = stateManager.rotateClockwise()
 
     /**
      * Rotates the bitmap anti-clockwise in the ImageCropper.
      */
-    fun rotateAntiClockwise() = stateManager.rotateAntiClockwise()
+    suspend fun rotateAntiClockwise() = stateManager.rotateAntiClockwise()
 
     /**
      * Flips the bitmap horizontally in the ImageCropper.
      */
-    fun flipHorizontally() = stateManager.flipHorizontally()
+    suspend fun flipHorizontally() = stateManager.flipHorizontally()
 
     /**
      * Flips the bitmap vertically in the ImageCropper.
      */
-    fun flipVertically() = stateManager.flipVertically()
+    suspend fun flipVertically() = stateManager.flipVertically()
 
     internal fun onStateChange(action: CropStateChangeActions) {
         when (action) {
