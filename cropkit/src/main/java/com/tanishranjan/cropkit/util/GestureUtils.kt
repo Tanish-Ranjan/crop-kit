@@ -2,8 +2,8 @@ package com.tanishranjan.cropkit.util
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import com.tanishranjan.cropkit.internal.DragHandle
 import com.tanishranjan.cropkit.HandlesRect
+import com.tanishranjan.cropkit.internal.DragHandle
 
 internal object GestureUtils {
 
@@ -15,6 +15,7 @@ internal object GestureUtils {
      * @param imageRect The current image rect.
      * @param cropRect The current crop rect.
      * @param minCropSize The minimum size of crop rectangle that should be maintained.
+     * @param aspectRatio The aspect ratio (width/height) to maintain. 0 means free-form.
      *
      * @return The new crop rectangle if the drag is valid, null otherwise.
      */
@@ -23,116 +24,178 @@ internal object GestureUtils {
         dragAmount: Offset,
         imageRect: Rect,
         cropRect: Rect,
-        minCropSize: Float
+        minCropSize: Float,
+        aspectRatio: Float = 0f
     ): Rect? {
         return when (activeHandle) {
-
             DragHandle.TopLeft -> {
                 val newOffset = cropRect.topLeft + dragAmount
-                if (newOffset.x !in imageRect.left..cropRect.right - minCropSize
-                    || newOffset.y !in imageRect.top..cropRect.bottom - minCropSize
-                ) return null
-                Rect(
+                val isXWithinBounds = newOffset.x in imageRect.left..cropRect.right - minCropSize
+                val isYWithinBounds = newOffset.y in imageRect.top..cropRect.bottom - minCropSize
+                if (isXWithinBounds && isYWithinBounds) Rect(
                     left = newOffset.x,
                     top = newOffset.y,
                     right = cropRect.right,
                     bottom = cropRect.bottom
-                )
+                ) else cropRect
+
             }
 
             DragHandle.TopRight -> {
                 val newOffset = cropRect.topRight + dragAmount
-                if (newOffset.x !in cropRect.left + minCropSize..imageRect.right
-                    || newOffset.y !in imageRect.top..cropRect.bottom - minCropSize
-                ) return cropRect
-                Rect(
+                val isXWithinBounds = newOffset.x in cropRect.left + minCropSize..imageRect.right
+                val isYWithinBounds = newOffset.y in imageRect.top..cropRect.bottom - minCropSize
+                if (isXWithinBounds && isYWithinBounds) Rect(
                     left = cropRect.left,
                     top = newOffset.y,
                     right = newOffset.x,
                     bottom = cropRect.bottom
                 )
+                else return cropRect
+
             }
 
             DragHandle.BottomLeft -> {
                 val newOffset = cropRect.bottomLeft + dragAmount
-                if (newOffset.x !in imageRect.left..cropRect.right - minCropSize
-                    || newOffset.y !in cropRect.top + minCropSize..imageRect.bottom
-                ) return cropRect
-                Rect(
+                val isXWithinBounds = newOffset.x in imageRect.left..cropRect.right - minCropSize
+                val isYWithinBounds = newOffset.y in cropRect.top + minCropSize..imageRect.bottom
+                if (isXWithinBounds && isYWithinBounds) Rect(
                     left = newOffset.x,
                     top = cropRect.top,
                     right = cropRect.right,
                     bottom = newOffset.y
                 )
+                else cropRect
+
             }
 
             DragHandle.BottomRight -> {
                 val newOffset = cropRect.bottomRight + dragAmount
-                if (newOffset.x !in cropRect.left + minCropSize..imageRect.right
-                    || newOffset.y !in cropRect.top + minCropSize..imageRect.bottom
-                ) return cropRect
-                Rect(
+                val isXWithinBounds = newOffset.x in cropRect.left + minCropSize..imageRect.right
+                val isYWithinBounds = newOffset.y in cropRect.top + minCropSize..imageRect.bottom
+                if (isXWithinBounds && isYWithinBounds) Rect(
                     left = cropRect.left,
                     top = cropRect.top,
                     right = newOffset.x,
                     bottom = newOffset.y
                 )
+                else cropRect
             }
 
             DragHandle.Top -> {
-                val newOffset = cropRect.topLeft + dragAmount
-                val newTop = newOffset.y.coerceIn(
-                    imageRect.top,
-                    cropRect.bottom - minCropSize
-                )
-                Rect(
-                    left = cropRect.left,
-                    top = newTop,
-                    right = cropRect.right,
-                    bottom = cropRect.bottom
-                )
+                if (aspectRatio > 0f) {
+                    val newTop = (cropRect.top + dragAmount.y).coerceIn(
+                        imageRect.top, cropRect.bottom - minCropSize
+                    )
+                    val newHeight = cropRect.bottom - newTop
+                    val newWidth = newHeight * aspectRatio
+                    val centerX = cropRect.center.x
+                    val newLeft = centerX - newWidth / 2
+                    val newRight = centerX + newWidth / 2
+                    if (newWidth >= minCropSize && newLeft >= imageRect.left && newRight <= imageRect.right) {
+                        Rect(
+                            left = newLeft,
+                            top = newTop,
+                            right = newRight,
+                            bottom = cropRect.bottom
+                        )
+                    } else cropRect
+                } else {
+                    val newTop = (cropRect.top + dragAmount.y).coerceIn(
+                        imageRect.top, cropRect.bottom - minCropSize
+                    )
+                    Rect(
+                        left = cropRect.left, top = newTop,
+                        right = cropRect.right, bottom = cropRect.bottom
+                    )
+                }
             }
 
             DragHandle.Bottom -> {
-                val newOffset = cropRect.bottomLeft + dragAmount
-                val newBottom = newOffset.y.coerceIn(
-                    cropRect.top + minCropSize,
-                    imageRect.bottom
-                )
-                Rect(
-                    left = cropRect.left,
-                    top = cropRect.top,
-                    right = cropRect.right,
-                    bottom = newBottom
-                )
+                if (aspectRatio > 0f) {
+                    val newBottom = (cropRect.bottom + dragAmount.y).coerceIn(
+                        cropRect.top + minCropSize, imageRect.bottom
+                    )
+                    val newHeight = newBottom - cropRect.top
+                    val newWidth = newHeight * aspectRatio
+                    val centerX = cropRect.center.x
+                    val newLeft = centerX - newWidth / 2
+                    val newRight = centerX + newWidth / 2
+                    if (newWidth >= minCropSize && newLeft >= imageRect.left && newRight <= imageRect.right) {
+                        Rect(
+                            left = newLeft,
+                            top = cropRect.top,
+                            right = newRight,
+                            bottom = newBottom
+                        )
+                    } else cropRect
+                } else {
+                    val newBottom = (cropRect.bottom + dragAmount.y).coerceIn(
+                        cropRect.top + minCropSize, imageRect.bottom
+                    )
+                    Rect(
+                        left = cropRect.left, top = cropRect.top,
+                        right = cropRect.right, bottom = newBottom
+                    )
+                }
             }
 
             DragHandle.Left -> {
-                val newOffset = cropRect.bottomLeft + dragAmount
-                val newLeft = newOffset.x.coerceIn(
-                    imageRect.left,
-                    cropRect.right - minCropSize
-                )
-                Rect(
-                    left = newLeft,
-                    top = cropRect.top,
-                    right = cropRect.right,
-                    bottom = cropRect.bottom
-                )
+                if (aspectRatio > 0f) {
+                    val newLeft = (cropRect.left + dragAmount.x).coerceIn(
+                        imageRect.left, cropRect.right - minCropSize
+                    )
+                    val newWidth = cropRect.right - newLeft
+                    val newHeight = newWidth / aspectRatio
+                    val centerY = cropRect.center.y
+                    val newTop = centerY - newHeight / 2
+                    val newBottom = centerY + newHeight / 2
+                    if (newHeight >= minCropSize && newTop >= imageRect.top && newBottom <= imageRect.bottom) {
+                        Rect(
+                            left = newLeft,
+                            top = newTop,
+                            right = cropRect.right,
+                            bottom = newBottom
+                        )
+                    } else cropRect
+                } else {
+                    val newLeft = (cropRect.left + dragAmount.x).coerceIn(
+                        imageRect.left, cropRect.right - minCropSize
+                    )
+                    Rect(
+                        left = newLeft, top = cropRect.top,
+                        right = cropRect.right, bottom = cropRect.bottom
+                    )
+                }
             }
 
             DragHandle.Right -> {
-                val newOffset = cropRect.topRight + dragAmount
-                val newRight = newOffset.x.coerceIn(
-                    cropRect.left + minCropSize,
-                    imageRect.right
-                )
-                Rect(
-                    left = cropRect.left,
-                    top = cropRect.top,
-                    right = newRight,
-                    bottom = cropRect.bottom
-                )
+                if (aspectRatio > 0f) {
+                    val newRight = (cropRect.right + dragAmount.x).coerceIn(
+                        cropRect.left + minCropSize, imageRect.right
+                    )
+                    val newWidth = newRight - cropRect.left
+                    val newHeight = newWidth / aspectRatio
+                    val centerY = cropRect.center.y
+                    val newTop = centerY - newHeight / 2
+                    val newBottom = centerY + newHeight / 2
+                    if (newHeight >= minCropSize && newTop >= imageRect.top && newBottom <= imageRect.bottom) {
+                        Rect(
+                            left = cropRect.left,
+                            top = newTop,
+                            right = newRight,
+                            bottom = newBottom
+                        )
+                    } else cropRect
+                } else {
+                    val newRight = (cropRect.right + dragAmount.x).coerceIn(
+                        cropRect.left + minCropSize, imageRect.right
+                    )
+                    Rect(
+                        left = cropRect.left, top = cropRect.top,
+                        right = newRight, bottom = cropRect.bottom
+                    )
+                }
             }
         }
     }
