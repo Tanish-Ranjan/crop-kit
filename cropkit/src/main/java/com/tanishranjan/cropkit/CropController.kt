@@ -1,8 +1,9 @@
 package com.tanishranjan.cropkit
 
 import android.graphics.Bitmap
-import com.tanishranjan.cropkit.internal.CropStateManager
 import com.tanishranjan.cropkit.internal.CropStateChangeActions
+import com.tanishranjan.cropkit.internal.CropStateManager
+import java.io.Closeable
 
 /**
  * CropController is the main class that is used to interact with the [ImageCropper].
@@ -15,7 +16,7 @@ class CropController(
     bitmap: Bitmap,
     val cropOptions: CropOptions,
     val cropColors: CropColors
-) {
+) : Closeable {
 
     private val stateManager: CropStateManager = CropStateManager(
         bitmap = bitmap,
@@ -30,6 +31,10 @@ class CropController(
      * State flow of the ImageCropper current state.
      */
     internal val state = stateManager.state
+
+    override fun close() {
+        stateManager.close()
+    }
 
     /**
      * Returns the cropped bitmap.
