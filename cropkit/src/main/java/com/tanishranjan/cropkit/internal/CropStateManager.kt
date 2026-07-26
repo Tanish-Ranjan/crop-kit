@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
 internal class CropStateManager(
@@ -48,7 +49,7 @@ internal class CropStateManager(
         setState(canvasSize, state.value.bitmap)
     }
 
-    fun crop(): Bitmap {
+    suspend fun crop(): Bitmap = withContext(Dispatchers.Default) {
         val state = state.value
         val bitmap = state.bitmap
         val imageRect = state.imageRect
@@ -67,12 +68,11 @@ internal class CropStateManager(
         val width = cropWidth.coerceIn(0, bitmap.width - x)
         val height = cropHeight.coerceIn(0, bitmap.height - y)
 
-        return Bitmap.createBitmap(
+        return@withContext Bitmap.createBitmap(
             bitmap,
             x, y,
             width, height
         )
-
     }
 
     fun onDragStart(offset: Offset) {
@@ -120,23 +120,28 @@ internal class CropStateManager(
         }
     }
 
-    fun rotateClockwise() = transformBitmap { matrix -> matrix.postRotate(90f) }
+    suspend fun rotateClockwise() = transformBitmap { matrix -> matrix.postRotate(90f) }
 
-    fun rotateAntiClockwise() = transformBitmap { matrix -> matrix.postRotate(-90f) }
+    suspend fun rotateAntiClockwise() = transformBitmap { matrix -> matrix.postRotate(-90f) }
 
-    fun flipHorizontally() = transformBitmap { matrix -> matrix.postScale(-1f, 1f) }
+    suspend fun flipHorizontally() = transformBitmap { matrix -> matrix.postScale(-1f, 1f) }
 
-    fun flipVertically() = transformBitmap { matrix -> matrix.postScale(1f, -1f) }
+    suspend fun flipVertically() = transformBitmap { matrix -> matrix.postScale(1f, -1f) }
 
-    private fun transformBitmap(transformation: (Matrix) -> Unit) {
-        val bitmap = state.value.bitmap
+    private suspend fun transformBitmap(transformation: (Matrix) -> Unit) {
+        val oldBitmap = state.value.bitmap
         val matrix = Matrix().apply(transformation)
-        val newBitmap = Bitmap.createBitmap(
-            bitmap, 0, 0,
-            bitmap.width, bitmap.height,
-            matrix, true
-        )
+        val newBitmap = withContext(Dispatchers.Default) {
+            Bitmap.createBitmap(
+                oldBitmap, 0, 0,
+                oldBitmap.width, oldBitmap.height,
+                matrix, true
+            )
+        }
         reset(newBitmap)
+        if (newBitmap !== oldBitmap) {
+            oldBitmap.recycle()
+        }
     }
 
     private fun moveCropRect(dragAmount: Offset) {
