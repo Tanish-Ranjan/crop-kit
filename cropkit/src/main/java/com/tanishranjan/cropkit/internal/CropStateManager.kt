@@ -32,6 +32,9 @@ internal class CropStateManager(
     private val handleRadius: Dp,
     private val touchPadding: Dp
 ) {
+    companion object {
+        private const val MIN_CROP_SIZE_DP = 80f
+    }
 
     private val _state = MutableStateFlow(CropState(bitmap))
     val state = _state.asStateFlow()
@@ -39,6 +42,7 @@ internal class CropStateManager(
     private var dragMode: DragMode = DragMode.None
     private val density get() = Resources.getSystem().displayMetrics.density
     private val handleRadiusPx: Float get() = handleRadius.value * density
+    private val minCropSizePx: Float get() = MIN_CROP_SIZE_DP * density
 
     init {
         reset(bitmap)
@@ -181,7 +185,7 @@ internal class CropStateManager(
             dragAmount = adjustedDragAmount,
             imageRect = state.value.imageRect,
             cropRect = state.value.cropRect,
-            minCropSize = MIN_CROP_SIZE
+            minCropSize = minCropSizePx
         )?.let { newRect ->
             _state.update {
                 it.copy(
@@ -373,10 +377,6 @@ internal class CropStateManager(
             )
         }
 
-    }
-
-    companion object {
-        private const val MIN_CROP_SIZE = 250f
     }
 
 }
